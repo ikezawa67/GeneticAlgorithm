@@ -102,5 +102,13 @@ namespace GeneticAlgorithm
             Console.WriteLine("\tAverage: {0}", this.AverageFitness);
             Console.WriteLine();
         }
+
+        public void Execution(int numberOfExecutionGenerations)
+        {
+            for (int i = 0; i< numberOfExecutionGenerations;i++)
+            {
+                Step();
+            }
+        }
     }
 }
