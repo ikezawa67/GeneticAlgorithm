@@ -5,20 +5,29 @@ namespace GeneticAlgorithm
         private int NumberOfIndividuals;
         public int CurrentGenerationNumber { get; private set; } = 0;
         private List<Individual> population = new List<Individual>();
+        private SelectionMethod selectionMethod;
+        private CrossoverMethod crossoverMethod;
+        private double crossoverProbability;
+        private double mutationProbability;
+        private int eliteNumber;
         private Random random;
 
         public Individual MaxIndividual { get => this.population.OrderBy(p => -p.Fitness).First(); }
         public Individual MinIndividual { get => this.population.OrderBy(p => p.Fitness).First(); }
         public double AverageFitness { get => this.population.Select(p => p.Fitness).Average(); }
 
-
-        public GeneticAlgorithm(int numberOfIndividuals, int length, int count, Func<double[], double> fitness)
+        public GeneticAlgorithm(int numberOfIndividuals, int length, int count, Func<double[], double> fitness, SelectionMethod selectionMethod, CrossoverMethod crossoverMethod, double crossoverProbability, double mutationProbability, int eliteNumber)
         {
             this.NumberOfIndividuals = numberOfIndividuals;
             for (int i = 0; i < numberOfIndividuals; i++)
             {
                 this.population.Add(new Individual(length, count, fitness));
             }
+            this.selectionMethod = selectionMethod;
+            this.crossoverMethod = crossoverMethod;
+            this.crossoverProbability = crossoverProbability;
+            this.mutationProbability = mutationProbability;
+            this.eliteNumber = eliteNumber;
             this.random = new Random(new Random().Next());
         }
 
@@ -59,23 +68,23 @@ namespace GeneticAlgorithm
             }
         }
 
-        public void Step(SelectionMethod selectionMethod, CrossoverMethod crossoverMethod, double crossoverProbability, double mutationProbability, int eliteNumber)
+        public void Step()
         {
             this.CurrentGenerationNumber += 1;
             List<Individual> nextPopulation = new List<Individual>();
-            nextPopulation.AddRange(this.population.OrderBy(p => -p.Fitness).Take(eliteNumber).ToList());
+            nextPopulation.AddRange(this.population.OrderBy(p => -p.Fitness).Take(this.eliteNumber).ToList());
             while (nextPopulation.Count() <= this.NumberOfIndividuals)
             {
-                (Individual child1, Individual child2) = Selection(selectionMethod);
-                if (this.random.NextDouble() < crossoverProbability)
+                (Individual child1, Individual child2) = Selection(this.selectionMethod);
+                if (this.random.NextDouble() < this.crossoverProbability)
                 {
-                    Individual.Crossover(child1, child2, crossoverMethod);
+                    Individual.Crossover(child1, child2, this.crossoverMethod);
                 }
-                if (this.random.NextDouble() < mutationProbability)
+                if (this.random.NextDouble() < this.mutationProbability)
                 {
                     child1.Mutate();
                 }
-                if (this.random.NextDouble() < mutationProbability)
+                if (this.random.NextDouble() < this.mutationProbability)
                 {
                     child2.Mutate();
                 }
