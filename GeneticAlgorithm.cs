@@ -6,12 +6,17 @@ namespace GeneticAlgorithm
     public class GeneticAlgorithm
     {
         private Parameter parameter;
+
         public int CurrentGenerationNumber { get; private set; } = 0;
+
         private List<Individual> population = new List<Individual>();
+
         private Random random;
 
         public Individual MaxIndividual { get => this.population.OrderBy(p => -p.Fitness).First(); }
+
         public Individual MinIndividual { get => this.population.OrderBy(p => p.Fitness).First(); }
+        
         public double AverageFitness { get => this.population.Select(p => p.Fitness).Average(); }
 
         public GeneticAlgorithm(Parameter parameter)

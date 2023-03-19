@@ -3,7 +3,8 @@ namespace GeneticAlgorithm
     public class Gene
     {
         public bool[] Value { get; internal set; }
-        private Random random;
+        
+        public int Length { get => this.Value.Length; }        
 
         public bool this[int i]
         {
@@ -11,7 +12,6 @@ namespace GeneticAlgorithm
             internal set { this.Value[i] = value; }
         }
 
-        public int Length { get => this.Value.Length; }
         public double Number
         {
             get
@@ -29,6 +29,8 @@ namespace GeneticAlgorithm
                 return number / table.Sum();
             }
         }
+
+        private Random random;
 
         public Gene(int length)
         {

@@ -5,8 +5,11 @@ namespace GeneticAlgorithm
     public class Individual
     {
         private Gene[] genes;
+
         private Script<double> fitness;
+
         public int Length { get; private set; }
+        
         public int Count { get; private set; }
 
         public double[] Numbers
@@ -21,6 +24,7 @@ namespace GeneticAlgorithm
                 return numbers;
             }
         }
+
         public double Fitness
         {
             get
