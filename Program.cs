@@ -1,37 +1,49 @@
-﻿using Microsoft.CodeAnalysis.CSharp.Scripting;
-using Microsoft.CodeAnalysis.Scripting;
+﻿using System.Text.Json;
+using System.CommandLine;
 
 namespace GeneticAlgorithm
 {
-    public class Globals
-    {
-        public double[] args;
-
-        public Globals(double[] args)
-        {
-            this.args = args;
-        }
-    }
-
     class Program
     {
-        static double fitness(double[] args)
+        public static int Main(params string[] args)
         {
-            double x = args[0];
-            double y = args[1];
-            return x * y;
-        }
-
-        public static void Main()
-        {
-            // Script<double> script = CSharpScript.Create<double>(@"
-            //     return args[0] * args[1];
-            // ", globalsType: typeof(Globals));
-            // Globals globals = new Globals(new double[] { 2, 2 });
-            // var result = script.RunAsync(globals).Result;
-            // Console.Write(result.ReturnValue);
-            GeneticAlgorithm ga = new GeneticAlgorithm(100, 10, 2, fitness, SelectionMethod.Ranking, CrossoverMethod.Uniform, 0.1, 0.01, 2);
-            ga.Execution(1000);
+            Option<string?>? fileOption = new Option<string?>(aliases: new string[] { "--file", "-f" }, description: "遺伝的アルゴリズムのパラメーターを記述したjsonファイル。");
+            RootCommand rootCommand = new RootCommand("遺伝的アルゴリズム");
+            rootCommand.AddOption(fileOption);
+            rootCommand.SetHandler((filePath) =>
+            {
+                Parameter parameter = new Parameter();
+                if (filePath is not null)
+                {
+                    if (!File.Exists(filePath))
+                    {
+                        filePath = Path.Combine(Directory.GetCurrentDirectory(), filePath!);
+                    }
+                    if (File.Exists(filePath))
+                    {
+                        string json = File.ReadAllText(filePath);
+                        Parameter? tmp = JsonSerializer.Deserialize<Parameter>(json);
+                        if (tmp is not null)
+                        {
+                            parameter = tmp;
+                        }
+                        else
+                        {
+                            json = JsonSerializer.Serialize(new Parameter());
+                            File.WriteAllText("parameter.json", json);
+                        }
+                    }
+                    else
+                    {
+                        string json = JsonSerializer.Serialize(new Parameter());
+                        File.WriteAllText("parameter.json", json);
+                    }
+                }
+                GeneticAlgorithm ga = new GeneticAlgorithm(parameter);
+                ga.Execution(parameter.numberOfExecutionGenerations);
+            },
+            fileOption);
+            return rootCommand.InvokeAsync(args).Result;
         }
     }
 }

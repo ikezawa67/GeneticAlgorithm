@@ -1,9 +1,11 @@
+using Microsoft.CodeAnalysis.Scripting;
+
 namespace GeneticAlgorithm
 {
     public class Individual
     {
         private Gene[] genes;
-        private Func<double[], double> fitness;
+        private Script<double> fitness;
         public int Length { get; private set; }
         public int Count { get; private set; }
 
@@ -19,9 +21,16 @@ namespace GeneticAlgorithm
                 return numbers;
             }
         }
-        public double Fitness { get => this.fitness(this.Numbers); }
+        public double Fitness
+        {
+            get
+            {
+                ScriptState<double>? result = this.fitness.RunAsync(new Globals(this.Numbers)).Result;
+                return result.ReturnValue;
+            }
+        }
 
-        public Individual(int length, int count, Func<double[], double> fitness)
+        public Individual(int length, int count, Script<double> fitness)
         {
             this.genes = new Gene[count];
             for (int i = 0; i < count; i++)

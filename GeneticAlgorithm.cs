@@ -1,33 +1,27 @@
+using Microsoft.CodeAnalysis.Scripting;
+using Microsoft.CodeAnalysis.CSharp.Scripting;
+
 namespace GeneticAlgorithm
 {
     public class GeneticAlgorithm
     {
-        private int NumberOfIndividuals;
+        private Parameter parameter;
         public int CurrentGenerationNumber { get; private set; } = 0;
         private List<Individual> population = new List<Individual>();
-        private SelectionMethod selectionMethod;
-        private CrossoverMethod crossoverMethod;
-        private double crossoverProbability;
-        private double mutationProbability;
-        private int eliteNumber;
         private Random random;
 
         public Individual MaxIndividual { get => this.population.OrderBy(p => -p.Fitness).First(); }
         public Individual MinIndividual { get => this.population.OrderBy(p => p.Fitness).First(); }
         public double AverageFitness { get => this.population.Select(p => p.Fitness).Average(); }
 
-        public GeneticAlgorithm(int numberOfIndividuals, int length, int count, Func<double[], double> fitness, SelectionMethod selectionMethod, CrossoverMethod crossoverMethod, double crossoverProbability, double mutationProbability, int eliteNumber)
+        public GeneticAlgorithm(Parameter parameter)
         {
-            this.NumberOfIndividuals = numberOfIndividuals;
-            for (int i = 0; i < numberOfIndividuals; i++)
-            {
-                this.population.Add(new Individual(length, count, fitness));
+            this.parameter = parameter;
+            for (int i = 0; i < this.parameter.numberOfIndividuals; i++)
+            {                
+                Script<double> script = CSharpScript.Create<double>(this.parameter.fitness, globalsType: typeof(Globals));
+                this.population.Add(new Individual(this.parameter.length, this.parameter.count, script));
             }
-            this.selectionMethod = selectionMethod;
-            this.crossoverMethod = crossoverMethod;
-            this.crossoverProbability = crossoverProbability;
-            this.mutationProbability = mutationProbability;
-            this.eliteNumber = eliteNumber;
             this.random = new Random(new Random().Next());
         }
 
@@ -72,26 +66,26 @@ namespace GeneticAlgorithm
         {
             this.CurrentGenerationNumber += 1;
             List<Individual> nextPopulation = new List<Individual>();
-            nextPopulation.AddRange(this.population.OrderBy(p => -p.Fitness).Take(this.eliteNumber).ToList());
-            while (nextPopulation.Count() <= this.NumberOfIndividuals)
+            nextPopulation.AddRange(this.population.OrderBy(p => -p.Fitness).Take(this.parameter.eliteNumber).ToList());
+            while (nextPopulation.Count() <= this.parameter.numberOfIndividuals)
             {
-                (Individual child1, Individual child2) = Selection(this.selectionMethod);
-                if (this.random.NextDouble() < this.crossoverProbability)
+                (Individual child1, Individual child2) = Selection(this.parameter.selectionMethod);
+                if (this.random.NextDouble() < this.parameter.crossoverProbability)
                 {
-                    Individual.Crossover(child1, child2, this.crossoverMethod);
+                    Individual.Crossover(child1, child2, this.parameter.crossoverMethod);
                 }
-                if (this.random.NextDouble() < this.mutationProbability)
+                if (this.random.NextDouble() < this.parameter.mutationProbability)
                 {
                     child1.Mutate();
                 }
-                if (this.random.NextDouble() < this.mutationProbability)
+                if (this.random.NextDouble() < this.parameter.mutationProbability)
                 {
                     child2.Mutate();
                 }
                 nextPopulation.Add(child1);
                 nextPopulation.Add(child2);
             }
-            while (this.NumberOfIndividuals < nextPopulation.Count)
+            while (this.parameter.numberOfIndividuals < nextPopulation.Count)
             {
                 nextPopulation.RemoveAt(nextPopulation.Count - 1);
             }

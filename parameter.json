@@ -1,0 +1,1 @@
+{"numberOfIndividuals":100,"length":10,"count":2,"fitness":"double x = args[0];\ndouble y = args[1];\nreturn x * y;","selectionMethod":0,"crossoverMethod":0,"crossoverProbability":0.1,"mutationProbability":0.01,"eliteNumber":2,"numberOfExecutionGenerations":1000}
