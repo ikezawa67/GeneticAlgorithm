@@ -7,7 +7,7 @@ namespace GeneticAlgorithm
     {
         public static int Main(params string[] args)
         {
-            Option<string?>? fileOption = new Option<string?>(aliases: new string[] { "--file", "-f" }, description: "遺伝的アルゴリズムのパラメーターを記述したjsonファイル。");
+            Option<string> fileOption = new Option<string>(aliases: new string[] { "--file", "-f" }, description: "遺伝的アルゴリズムのパラメーターを記述したjsonファイル。");
             RootCommand rootCommand = new RootCommand("遺伝的アルゴリズム");
             rootCommand.AddOption(fileOption);
             rootCommand.SetHandler((filePath) =>
@@ -29,18 +29,25 @@ namespace GeneticAlgorithm
                         }
                         else
                         {
-                            json = JsonSerializer.Serialize(new Parameter());
+                            json = JsonSerializer.Serialize(new Parameter(), new JsonSerializerOptions { WriteIndented = true });
                             File.WriteAllText("parameter.json", json);
                         }
                     }
                     else
                     {
-                        string json = JsonSerializer.Serialize(new Parameter());
+                        string json = JsonSerializer.Serialize(new Parameter(), new JsonSerializerOptions { WriteIndented = true });
                         File.WriteAllText("parameter.json", json);
                     }
                 }
-                GeneticAlgorithm ga = new GeneticAlgorithm(parameter);
-                ga.Execution(parameter.numberOfExecutionGenerations);
+                try
+                {
+                    GeneticAlgorithm ga = new GeneticAlgorithm(parameter);
+                    ga.Execution(parameter.numberOfExecutionGenerations);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                }
             },
             fileOption);
             return rootCommand.InvokeAsync(args).Result;

@@ -2,16 +2,34 @@ using Microsoft.CodeAnalysis.Scripting;
 
 namespace GeneticAlgorithm
 {
+    /// <summary>
+    /// 遺伝的アルゴリズムの個体クラス
+    /// </summary>
     public class Individual
     {
+        /// <summary>
+        /// 遺伝子情報配列
+        /// </summary>
         private Gene[] genes;
 
+        /// <summary>
+        /// 適応度を求めるスクリプト
+        /// </summary>
         private Script<double> fitness;
 
-        public int Length { get; private set; }
-        
-        public int Count { get; private set; }
+        /// <summary>
+        /// 遺伝子配列の長さ
+        /// </summary>
+        public int Length { get => this.genes[0].Length; }
 
+        /// <summary>
+        /// 遺伝子情報配列の数
+        /// </summary>
+        public int Count { get => this.genes.Length; }
+
+        /// <summary>
+        /// 遺伝子情報配列を十進数表記に変換した配列（0以上、1以下）
+        /// </summary>
         public double[] Numbers
         {
             get
@@ -25,15 +43,17 @@ namespace GeneticAlgorithm
             }
         }
 
-        public double Fitness
-        {
-            get
-            {
-                ScriptState<double>? result = this.fitness.RunAsync(new Globals(this.Numbers)).Result;
-                return result.ReturnValue;
-            }
-        }
+        /// <summary>
+        /// 個体の適応度
+        /// </summary>
+        public double Fitness { get => this.fitness.RunAsync(new Global(this.Numbers)).Result.ReturnValue; }
 
+        /// <summary>
+        /// 渡された遺伝子の長さのな遺伝子配列を遺伝子情報配列の数分生成する
+        /// </summary>
+        /// <param name="length">遺伝子配列の長さ</param>
+        /// <param name="count">遺伝子情報配列の数</param>
+        /// <param name="fitness">適応度を求める関数の文字列</param>
         public Individual(int length, int count, Script<double> fitness)
         {
             this.genes = new Gene[count];
@@ -41,11 +61,14 @@ namespace GeneticAlgorithm
             {
                 this.genes[i] = new Gene(length);
             }
-            this.Length = length;
-            this.Count = count;
             this.fitness = fitness;
         }
 
+        /// <summary>
+        /// 一点交叉メソッド
+        /// </summary>
+        /// <param name="child1">子の個体1</param>
+        /// <param name="child2">子の個体2</param>
         private static void OnePointCrossover(Individual child1, Individual child2)
         {
             Random random = new Random(new Random().Next());
@@ -60,6 +83,11 @@ namespace GeneticAlgorithm
             }
         }
 
+        /// <summary>
+        /// 二点交叉メソッド
+        /// </summary>
+        /// <param name="child1">子の個体1</param>
+        /// <param name="child2">子の個体2</param>
         private static void TwoPointCrossover(Individual child1, Individual child2)
         {
             Random random = new Random(new Random().Next());
@@ -76,6 +104,11 @@ namespace GeneticAlgorithm
             }
         }
 
+        /// <summary>
+        /// 一様交差メソッド
+        /// </summary>
+        /// <param name="child1">子の個体1</param>
+        /// <param name="child2">子の個体2</param>
         private static void UniformCrossover(Individual child1, Individual child2)
         {
             Random random = new Random(new Random().Next());
@@ -94,6 +127,12 @@ namespace GeneticAlgorithm
             }
         }
 
+        /// <summary>
+        /// 交叉メソッド
+        /// </summary>
+        /// <param name="child1">子の個体1</param>
+        /// <param name="child2">子の個体2</param>
+        /// <param name="crossoverMethod">交叉方法の列挙型</param>
         public static void Crossover(Individual child1, Individual child2, CrossoverMethod crossoverMethod)
         {
             if (crossoverMethod == CrossoverMethod.OnePoint)
@@ -110,6 +149,9 @@ namespace GeneticAlgorithm
             }
         }
 
+        /// <summary>
+        /// 突然変異メソッド
+        /// </summary>
         public void Mutate()
         {
             foreach (Gene gene in this.genes)
@@ -118,6 +160,10 @@ namespace GeneticAlgorithm
             }
         }
 
+        /// <summary>
+        /// 深いコピーメソッド
+        /// </summary>
+        /// <returns>コピーした遺伝子情報オブジェクト</returns>
         public Individual DeepCopy()
         {
             Individual clone = (Individual)MemberwiseClone();

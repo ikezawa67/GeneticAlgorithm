@@ -2,7 +2,7 @@
   "numberOfIndividuals": 100,
   "length": 10,
   "count": 2,
-  "fitness": "return args[0] * args[1];",
+  "fitness": "using System;\nreturn 5 * Math.Pow(args[0], 2) - 2 * args[1] + 8;",
   "selectionMethod": 0,
   "crossoverMethod": 0,
   "crossoverProbability": 0.1,
